@@ -7,6 +7,7 @@
 #include <cmath>
 #include <random>
 #include <optional>
+#include <functional>
 using namespace std;
 
 
@@ -41,6 +42,43 @@ public:
 			this->child_l->print( out, depth + 1 );
 		if( this->child_r != nullptr )
 			this->child_r->print( out, depth + 1 );
+	};
+
+	// Recursive traversal functions
+	void traverse_inorder( function<void(shared_ptr<T>)> f ) {
+
+		if( this->child_l != nullptr )
+			this->child_l->traverse_inorder( f );
+
+		f( this->payload );
+
+		if( this->child_r != nullptr )
+			this->child_r->traverse_inorder( f );
+
+	}
+
+	void traverse_pre( function<void(shared_ptr<T>)> f ) {
+
+		f( this->payload );
+
+		if( this->child_l != nullptr )
+			this->child_l->traverse_pre( f );
+
+		if( this->child_r != nullptr )
+			this->child_r->traverse_pre( f );
+
+	}
+
+	void traverse_post( function<void(shared_ptr<T>)> f ) {
+
+		if( this->child_l != nullptr )
+			this->child_l->traverse_post( f );
+
+		if( this->child_r != nullptr )
+			this->child_r->traverse_post( f );
+
+		f( this->payload );
+
 	}
 
 };
@@ -49,10 +87,10 @@ public:
 template<class T, typename K>
 class RBTree {
 protected:
-	// Manage memory by a vector of unique_ptrs, but all links between nodes will be raw pointers
+	// Manage memory with an arena of unique_ptrs, all links between nodes will be raw pointers
 	// This is safe, because they will all exist as long as the graph exists, and once the graph is killed, all nodes will be deallocated as expected
 	// We could theoretically use weak_ptrs, but it would involve too much overhead
-	// We never expose the nodes, so if someone gets a pointer to one they are not using the tree API
+	// We never expose the nodes, so if someone gets a pointer to one, they are not using the tree API
 	vector<unique_ptr<RBNode<T, K>>> node_arena;
 	RBNode<T, K> * root = nullptr;
 
@@ -282,4 +320,18 @@ public:
 		return out;
 
 	};
+
+	// Walking functions!
+	void traverse_inorder( function<void(shared_ptr<T>)> f ) {
+		if( this->root != nullptr )
+			this->root->traverse_inorder( f );
+	}
+	void traverse_pre( function<void(shared_ptr<T>)> f ) {
+		if( this->root != nullptr )
+			this->root->traverse_pre( f );
+	}
+	void traverse_post( function<void(shared_ptr<T>)> f ) {
+		if( this->root != nullptr )
+			this->root->traverse_post( f );
+	}
 };

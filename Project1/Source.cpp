@@ -92,6 +92,10 @@ int main( ) {
 
 	cout << t;
 
+	t.traverse_inorder( [ ]( shared_ptr<Payload> p ) {
+		cout << p << " ";
+	} );
+
 	return 0;
 
 }
