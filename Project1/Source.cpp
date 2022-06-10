@@ -9,7 +9,7 @@ void quicksort( vector<int> & arr, int left, int right ) { // 3 1 2 -- 1 3 2
 	// Base case - nothing to sort
 	if( left >= right )
 		return;
-	
+
 	// Pick a pivot, swap to back
 	// Naive, use last elem as-is
 	int pivot_val = arr[ right ];
@@ -23,7 +23,7 @@ void quicksort( vector<int> & arr, int left, int right ) { // 3 1 2 -- 1 3 2
 		// We don't need to check for the end here because we will always stop at least at the pivot
 		while( arr[ from_left ] < pivot_val )
 			from_left++;
-	
+
 		// Here we have to make sure we stop at from_left
 		// We can blow off end if pivot happens to be the smallest element in this segment
 		while( arr[ from_right ] >= pivot_val && from_left < from_right )
@@ -81,14 +81,16 @@ int main( ) {
 		t.insert( p );
 	}
 
-	for( int _ = 0; _ < 16; ++_ ) {
+	for( int _ = 0; _ < 32; ++_ ) {
 		int guess = dist( gen );
 		optional<shared_ptr<Payload>> res = t.search( guess );
 		if( res )
-			cout << guess << ": " << *res << endl;
+			cout << guess << ": " << **res << endl;
 		else
 			cout << guess << ": MISSING" << endl;
 	}
+
+	cout << t;
 
 	return 0;
 

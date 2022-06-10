@@ -33,6 +33,16 @@ public:
 	inline bool operator==( const K & r ) { return *this->payload == r; };
 	inline bool operator<( const K & r ) { return *this->payload < r; };
 
+	void print( ostream & out, int depth ) {
+		out << string( depth, ' ' );
+		out << ( this->color == RBColor::BLACK ? "B: " : "R: " ) << *this->payload << endl;
+
+		if( this->child_l != nullptr )
+			this->child_l->print( out, depth + 1 );
+		if( this->child_r != nullptr )
+			this->child_r->print( out, depth + 1 );
+	}
+
 };
 
 
@@ -48,8 +58,66 @@ protected:
 
 	void rotate_right( RBNode<T, K> * node ) {
 
+		// Replace node with its left child, preserving in-order traversal
+		
+		// Double check that child exists...
+		if( node->child_l == nullptr )
+			return;
+
+		RBNode<T, K> * cl = node->child_l;
+
+		// Make our left tree the child's right
+		node->child_l = cl->child_r;
+		if( node->child_l != nullptr )
+			node->child_l->parent = node;
+
+		// Move child up
+		cl->parent = node->parent;
+		if( node->parent == nullptr ) {
+			this->root = cl;
+		} else {
+			if( node->parent->child_l == node ) {
+				node->parent->child_l = cl;
+			} else {
+				node->parent->child_r = cl;
+			}
+		}
+
+		// Now move node down
+		node->parent = cl;
+		cl->child_r = node;
+
 	}
 	void rotate_left( RBNode<T, K> * node ) {
+
+		// Replace node with its right child, preserving in-order traversal
+
+		// Double check that child exists...
+		if( node->child_r == nullptr )
+			return;
+
+		RBNode<T, K> * cr = node->child_r;
+
+		// Make our left tree the child's right
+		node->child_r = cr->child_l;
+		if( node->child_r != nullptr )
+			node->child_r->parent = node;
+
+		// Move child up
+		cr->parent = node->parent;
+		if( node->parent == nullptr ) {
+			this->root = cr;
+		} else {
+			if( node->parent->child_r == node ) {
+				node->parent->child_r = cr;
+			} else {
+				node->parent->child_l = cr;
+			}
+		}
+
+		// Now move node down
+		node->parent = cr;
+		cr->child_l = node;
 
 	}
 
@@ -104,7 +172,7 @@ protected:
 			grandparent->color = RBColor::RED;
 
 		} else {
-			
+
 			// Parent is right -- flipped from above
 
 			// If we make a triangle, need to rotate to a line
@@ -139,7 +207,7 @@ public:
 		return nullopt;
 	};
 
-	bool insert( shared_ptr<T>& payload ) {
+	bool insert( shared_ptr<T> & payload ) {
 
 		// Find spot to insert, fail if already in tree
 		RBNode<T, K> * parent = this->root;
@@ -151,7 +219,7 @@ public:
 				// Fail, node already exists in tree
 				return false;
 
-			}  else if( *parent < *payload ) {
+			} else if( *parent < *payload ) {
 				// Look right
 				if( parent->child_r == nullptr ) {
 					// We need to be right child
@@ -180,13 +248,13 @@ public:
 
 		// Attach it to its parent
 		node->parent = parent;
-		
+
 		// If we are the first, set as root and return
 		if( parent == nullptr ) {
 
 			this->root = node;
 			node->color = RBColor::BLACK;
-			return;
+			return true;
 
 		} else {
 
@@ -201,6 +269,17 @@ public:
 
 		// Now we have to repair the tree
 		fixup_tree( node );
+
+		return true;
+
+	};
+
+	friend ostream & operator<<( ostream & out, const RBTree<T, K> & t ) {
+
+		if( t.root != nullptr )
+			t.root->print( out, 0 );
+
+		return out;
 
 	};
 };
